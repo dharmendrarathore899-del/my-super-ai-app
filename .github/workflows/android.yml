@@ -1,0 +1,40 @@
+name: Build Android APK
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Cordova & Build App
+        run: |
+          npm install -g cordova
+          cordova create super_app com.rishi.aicoder SuperAICoder
+          cd super_app
+          cordova platform add android
+          rm -rf www/index.html
+          cp ../index.html www/index.html
+          cordova build android --no-telemetry
+          
+      - name: Upload Finished APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SuperAICoder-Release-APK
+          path: super_app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          
