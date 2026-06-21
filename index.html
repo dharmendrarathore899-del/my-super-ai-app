@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super AI Coder</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --chat-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --accent-color: #007bff;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            background-color: var(--chat-bg);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid #333;
+        }
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 12px;
+            border-radius: 8px;
+            line-height: 1.4;
+        }
+        .user-msg {
+            background-color: var(--accent-color);
+            align-self: flex-end;
+        }
+        .ai-msg {
+            background-color: var(--chat-bg);
+            align-self: flex-start;
+        }
+        .input-area {
+            padding: 15px;
+            background-color: var(--chat-bg);
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2a2a2a;
+            color: white;
+        }
+        button {
+            padding: 12px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">🤖 Super AI Coder (निजी एवं सुरक्षित)</div>
+    
+    <div class="chat-container" id="chatContainer">
+        <div class="message ai-msg">नमस्ते ऋषि! मैं आपका स्वतंत्र एआई असिस्टेंट हूँ। मैं ऑफलाइन और ऑनलाइन दोनों तरह से कोडिंग कर सकता हूँ। पूछिए आपको क्या ऐप बनाना है?</div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="यहाँ अपना प्रॉम्ट या एरर कोड लिखें...">
+        <button onclick="sendMessage()">भेजें</button>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const inputField = document.getElementById('userInput');
+            const chatContainer = document.getElementById('chatContainer');
+            const text = inputField.value.trim();
+            
+            if (!text) return;
+
+            // यूजर का मैसेज स्क्रीन पर जोड़ें
+            const userDiv = document.createElement('div');
+            userDiv.className = 'message user-msg';
+            userDiv.innerText = text;
+            chatContainer.appendChild(userDiv);
+            inputField.value = '';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // एआई प्रतिक्रिया के लिए बॉक्स बनाएं
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'message ai-msg';
+            aiDiv.innerText = 'सोच रहा हूँ...';
+            chatContainer.appendChild(aiDiv);
+
+            try {
+                // यहाँ हम आपके लोकल होस्ट सर्वर (Llama 3.2) से कनेक्ट करेंगे
+                const response = await fetch('http://localhost:8080/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "llama-3.2-3b",
+                        messages: [{ role: "user", content: text }]
+                    })
+                });
+                const data = await response.json();
+                aiDiv.innerText = data.choices[0].message.content;
+            } catch (error) {
+                aiDiv.innerText = "ऑफलाइन मोड: लोकल एआई इंजन से संपर्क नहीं हो सका। कृपया सुनिश्चित करें कि बैकग्राउंड में मॉडल रन कर रहा है।";
+            }
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
